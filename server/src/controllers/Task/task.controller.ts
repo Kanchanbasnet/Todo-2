@@ -13,7 +13,7 @@ import { db } from "../../config/firebase";
 
 export const createTaskByUserId = async (req: Request, res: Response) => {
   try {
-    const { email, title, dueDate } = req.body;
+    const { email, title } = req.body;
     const user = query(collection(db, "users"), where("email", "==", email));
     const userSnapshot = await getDocs(user);
 
@@ -23,14 +23,9 @@ export const createTaskByUserId = async (req: Request, res: Response) => {
 
     const userDoc = userSnapshot.docs[0];
     const userref = doc(db, "users", userDoc.id);
-    const parsedDueDate = dueDate ? new Date(dueDate) : null;
-    if (parsedDueDate && parsedDueDate < new Date()) {
-      throw new Error("Due date cannot be in the past.");
-    }
 
     await addDoc(collection(userref, "tasks"), {
       title,
-      dueDate: dueDate ? new Date(dueDate) : null,
       completed: false,
       createdAt: new Date(),
     });
@@ -67,7 +62,7 @@ export const getTasksByUserId = async (req: Request, res: Response) => {
 
 export const updateUserTaskById = async (req: Request, res: Response) => {
   try {
-    const { email, taskId, title, dueDate } = req.body;
+    const { email, taskId, title } = req.body;
 
     const user = query(collection(db, "users"), where("email", "==", email));
     const userSnapShot = await getDocs(user);
@@ -80,7 +75,6 @@ export const updateUserTaskById = async (req: Request, res: Response) => {
     const taskref = doc(userRef, "tasks", taskId);
     await updateDoc(taskref, {
       title,
-      dueDate: dueDate ? new Date(dueDate) : null,
       completed: false,
       updateDocAt: new Date(),
     });
